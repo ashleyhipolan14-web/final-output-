@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sari-Sari Store Sales & Inventory Management System</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: #f0f2f5;
+    color: #333;
+    min-height: 100vh;
+  }
+
+  /* ---------- AUTH SCREEN ---------- */
+  #authScreen {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    padding: 20px;
+  }
+
+  .auth-box {
+    background: #fff;
+    border-radius: 16px;
+    padding: 40px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+  }
+
+  .auth-box h1 {
+    text-align: center;
+    font-size: 22px;
+    color: #1e3c72;
+    margin-bottom: 6px;
+  }
+
+  .auth-box .subtitle {
+    text-align: center;
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 24px;
+  }
+
+  .tabs {
+    display: flex;
+    margin-bottom: 24px;
+    border-bottom: 2px solid #eee;
+  }
+
+  .tabs button {
+    flex: 1;
+    background: none;
+    border: none;
+    padding: 12px;
+    font-size: 15px;
+    cursor: pointer;
+    color: #888;
+    font-weight: 600;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+  }
+
+  .tabs button.active {
+    color: #1e3c72;
+    border-bottom-color: #1e3c72;
+  }
+
+  .field { margin-bottom: 16px; }
+
+  .field label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #555;
+  }
+
+  .field input {
+    width: 100%;
+    padding: 11px 14px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: border 0.2s;
+  }
+
+  .field input:focus {
+    outline: none;
+    border-color: #2a5298;
+  }
+
+  .btn-primary {
+    width: 100%;
+    background: #1e3c72;
+    color: #fff;
+    border: none;
+    padding: 13px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-top: 6px;
+  }
+
+  .btn-primary:hover { background: #2a5298; }
+
+  .error-msg {
+    color: #d32f2f;
+    font-size: 13px;
+    margin-top: 12px;
+    text-align: center;
+    min-height: 18px;
+  }
+
+  /* ---------- MAIN APP ---------- */
+  #appScreen { display: none; }
+
+  header {
+    background: #1e3c72;
+    color: #fff;
+    padding: 16px 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+  }
+
+  header h1 { font-size: 18px; }
+  header h1 span { font-weight: 400; opacity: 0.8; font-size: 14px; }
+
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 14px;
+  }
+
+  .btn-logout {
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.3);
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: background 0.2s;
+  }
+
+  .btn-logout:hover { background: rgba(255,255,255,0.28); }
+
+  nav {
+    background: #fff;
+    padding: 0 28px;
+    display: flex;
+    gap: 4px;
+    border-bottom: 1px solid #e0e0e0;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    overflow-x: auto;
+  }
+
+  nav button {
+    background: none;
+    border: none;
+    padding: 16px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #777;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+
+  nav button.active {
+    color: #1e3c72;
+    border-bottom-color: #1e3c72;
+  }
+
+  nav button:hover { color: #1e3c72; }
+
+  main { padding: 28px; max-width: 1200px; margin: 0 auto; }
+
+  .page { display: none; }
+  .page.active { display: block; }
+
+  .page-title {
+    font-size: 22px;
+    color: #1e3c72;
+    margin-bottom: 4px;
+  }
+
+  .page-desc {
+    font-size: 14px;
+    color: #888;
+    margin-bottom: 22px;
+  }
+
+  /* Dashboard cards */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 18px;
+    margin-bottom: 28px;
+  }
+
+  .stat-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 22px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    border-left: 5px solid #2a5298;
+  }
+
+  .stat-card .label {
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .stat-card .value {
+    font-size: 30px;
+    font-weight: 700;
+    color: #1e3c72;
+  }
+
+  .stat-card.warn { border-left-color: #f57c00; }
+  .stat-card.warn .value { color: #f57c00; }
+
+  .stat-card.money { border-left-color: #2e7d32; }
+  .stat-card.money .value { color: #2e7d32; }
+
+  .panel {
+    background: #fff;
+    border-radius: 12px;
+    padding: 22px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    margin-bottom: 22px;
+  }
+
+  .panel h3 {
+    font-size: 16px;
+    color: #1e3c72;
+    margin-bottom: 16px;
+  }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+
+  th {
+    text-align: left;
+    padding: 12px 10px;
+    background: #f7f9fc;
+    color: #555;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid #e8ecf1;
+  }
+
+  td {
+    padding: 12px 10px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  tr:hover td { background: #fafbfd; }
+
+  .badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .badge.ok { background: #e8f5e9; color: #2e7d32; }
+  .badge.low { background: #fff3e0; color: #f57c00; }
+  .badge.out { background: #ffebee; color: #c62828; }
+
+  .btn-sm {
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: none;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-right: 5px;
+    transition: opacity 0.2s;
+  }
+
+  .btn-sm:hover { opacity: 0.85; }
+  .btn-edit { background: #e3f2fd; color: #1565c0; }
+  .btn-del { background: #ffebee; color: #c62828; }
+  .btn-sell { background: #e8f5e9; color: #2e7d32; }
+
+  /* Forms */
+  .form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+
+  .form-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #555;
+  }
+
+  .form-group input, .form-group select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+  }
+
+  .form-group input:focus, .form-group select:focus {
+    outline: none;
+    border-color: #2a5298;
+  }
+
+  .btn-action {
+    background: #1e3c72;
+    color: #fff;
+    border: none;
+    padding: 11px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .btn-action:hover { background: #2a5298; }
+
+  .btn-secondary {
+    background: #e0e0e0;
+    color: #555;
+    border: none;
+    padding: 11px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-left: 8px;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #aaa;
+    font-size: 14px;
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: #323232;
+    color: #fff;
+    padding: 14px 22px;
+    border-radius: 8px;
+    font-size: 14px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s;
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  .toast.show { opacity: 1; transform: translateY(0); }
+  .toast.success { background: #2e7d32; }
+  .toast.error { background: #c62828; }
+
+  .search-box {
+    width: 100%;
+    max-width: 320px;
+    padding: 10px 14px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+    margin-bottom: 16px;
+  }
+
+  .search-box:focus { outline: none; border-color: #2a5298; }
+
+  @media (max-width: 640px) {
+    header { flex-direction: column; gap: 10px; align-items: flex-start; }
+    main { padding: 16px; }
+    nav { padding: 0 12px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= AUTH SCREEN ================= -->
+<div id="authScreen">
+  <div class="auth-box">
+    <h1>🏪 Sari-Sari Store</h1>
+    <p class="subtitle">Sales & Inventory Management System</p>
+
+    <div class="tabs">
+      <button id="tabLogin" class="active" onclick="switchTab('login')">Login</button>
+      <button id="tabSignup" onclick="switchTab('signup')">Sign Up</button>
+    </div>
+
+    <!-- Login Form -->
+    <div id="loginForm">
+      <div class="field">
+        <label>Username</label>
+        <input type="text" id="loginUser" placeholder="Enter username">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="loginPass" placeholder="Enter password">
+      </div>
+      <button class="btn-primary" onclick="login()">Login</button>
+    </div>
+
+    <!-- Signup Form -->
+    <div id="signupForm" style="display:none;">
+      <div class="field">
+        <label>Full Name</label>
+        <input type="text" id="signupName" placeholder="Enter full name">
+      </div>
+      <div class="field">
+        <label>Username</label>
+        <input type="text" id="signupUser" placeholder="Choose a username">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="signupPass" placeholder="Choose a password">
+      </div>
+      <div class="field">
+        <label>Confirm Password</label>
+        <input type="password" id="signupPass2" placeholder="Re-enter password">
+      </div>
+      <button class="btn-primary" onclick="signup()">Create Account</button>
+    </div>
+
+    <div class="error-msg" id="authError"></div>
+  </div>
+</div>
+
+<!-- ================= MAIN APP ================= -->
+<div id="appScreen">
+  <header>
+    <h1>🏪 Sari-Sari Store <span>| Sales & Inventory System</span></h1>
+    <div class="user-info">
+      <span id="welcomeUser">Welcome!</span>
+      <button class="btn-logout" onclick="logout()">Logout</button>
+    </div>
+  </header>
+
+  <nav>
+    <button class="active" onclick="showPage('dashboard', this)">📊 Dashboard</button>
+    <button onclick="showPage('products', this)">📦 Products</button>
+    <button onclick="showPage('sales', this)">💰 Sales</button>
+    <button onclick="showPage('inventory', this)">📋 Inventory</button>
+  </nav>
+
+  <main>
+    <!-- DASHBOARD -->
+    <div id="dashboard" class="page active">
+      <h2 class="page-title">Dashboard</h2>
+      <p class="page-desc">Overview of your store's products, sales, and inventory.</p>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="label">Total Products</div>
+          <div class="value" id="statProducts">0</div>
+        </div>
+        <div class="stat-card warn">
+          <div class="label">Low Stock Items</div>
+          <div class="value" id="statLowStock">0</div>
+        </div>
+        <div class="stat-card money">
+          <div class="label">Total Sales</div>
+          <div class="value" id="statSales">₱0.00</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Transactions</div>
+          <div class="value" id="statTransactions">0</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>⚠️ Low Stock Alert (≤ 5 items)</h3>
+        <div id="lowStockList"></div>
+      </div>
+
+      <div class="panel">
+        <h3>🕒 Recent Sales</h3>
+        <div id="recentSales"></div>
+      </div>
+    </div>
+
+    <!-- PRODUCTS -->
+    <div id="products" class="page">
+      <h2 class="page-title">Product Management</h2>
+      <p class="page-desc">Add, view, update, and delete store products (CRUD).</p>
+
+      <div class="panel">
+        <h3 id="formTitle">➕ Add New Product</h3>
+        <input type="hidden" id="editId">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Product Name</label>
+            <input type="text" id="pName" placeholder="e.g., Coke 1.5L">
+          </div>
+          <div class="form-group">
+            <label>Category</label>
+            <input type="text" id="pCategory" placeholder="e.g., Beverages">
+          </div>
+          <div class="form-group">
+            <label>Price (₱)</label>
+            <input type="number" id="pPrice" placeholder="0.00" step="0.01" min="0">
+          </div>
+          <div class="form-group">
+            <label>Quantity in Stock</label>
+            <input type="number" id="pQty" placeholder="0" min="0">
+          </div>
+        </div>
+        <button class="btn-action" onclick="saveProduct()">Save Product</button>
+        <button class="btn-secondary" id="cancelBtn" style="display:none;" onclick="cancelEdit()">Cancel</button>
+      </div>
+
+      <div class="panel">
+        <h3>📦 Product List</h3>
+        <input type="text" class="search-box" id="productSearch" placeholder="🔍 Search products..." oninput="renderProducts()">
+        <div id="productTable"></div>
+      </div>
+    </div>
+
+    <!-- SALES -->
+    <div id="sales" class="page">
+      <h2 class="page-title">Sales Records</h2>
+      <p class="page-desc">Record a sale and view sales history.</p>
+
+      <div class="panel">
+        <h3>💵 Record a Sale</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Product</label>
+            <select id="saleProduct"></select>
+          </div>
+          <div class="form-group">
+            <label>Quantity</label>
+            <input type="number" id="saleQty" placeholder="0" min="1" value="1">
+          </div>
+        </div>
+        <button class="btn-action" onclick="recordSale()">Record Sale</button>
+      </div>
+
+      <div class="panel">
+        <h3>🧾 Sales History</h3>
+        <div id="salesTable"></div>
+      </div>
+    </div>
+
+    <!-- INVENTORY -->
+    <div id="inventory" class="page">
+      <h2 class="page-title">Inventory Status</h2>
+      <p class="page-desc">Monitor the quantity of products available in your store.</p>
+      <div class="panel">
+        <div id="inventoryTable"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   DATA LAYER (uses localStorage so data persists in browser)
+   ============================================================ */
+const DB = {
+  get(key) { return JSON.parse(localStorage.getItem(key) || '[]'); },
+  set(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+};
+
+// Seed default admin account if none exists
+if (!localStorage.getItem('sss_users')) {
+  DB.set('sss_users', [{ name: 'Administrator', username: 'admin', password: 'admin123' }]);
+}
+
+// Seed sample products on first run
+if (!localStorage.getItem('sss_products')) {
+  DB.set('sss_products', [
+    { id: 1, name: 'Coke 1.5L', category: 'Beverages', price: 75, qty: 20 },
+    { id: 2, name: 'Sky Flakes', category: 'Snacks', price: 12, qty: 45 },
+    { id: 3, name: 'Lucky Me Pancit Canton', category: 'Noodles', price: 18, qty: 4 },
+    { id: 4, name: 'Safeguard Soap', category: 'Toiletries', price: 35, qty: 3 },
+    { id: 5, name: 'Bear Brand 300g', category: 'Beverages', price: 120, qty: 8 }
+  ]);
+}
+
+if (!localStorage.getItem('sss_sales')) DB.set('sss_sales', []);
+
+let currentUser = null;
+
+/* ============================================================
+   AUTH
+   ============================================================ */
+function switchTab(tab) {
+  document.getElementById('authError').textContent = '';
+  if (tab === 'login') {
+    document.getElementById('tabLogin').classList.add('active');
+    document.getElementById('tabSignup').classList.remove('active');
+    document.getElementById('loginForm').style.display = 'block';
+    document.getElementById('signupForm').style.display = 'none';
+  } else {
+    document.getElementById('tabSignup').classList.add('active');
+    document.getElementById('tabLogin').classList.remove('active');
+    document.getElementById('signupForm').style.display = 'block';
+    document.getElementById('loginForm').style.display = 'none';
+  }
+}
+
+function login() {
+  const user = document.getElementById('loginUser').value.trim();
+  const pass = document.getElementById('loginPass').value;
+  const err = document.getElementById('authError');
+
+  if (!user || !pass) { err.textContent = 'Please enter username and password.'; return; }
+
+  const users = DB.get('sss_users');
+  const found = users.find(u => u.username === user && u.password === pass);
+
+  if (!found) { err.textContent = 'Invalid username or password.'; return; }
+
+  currentUser = found;
+  startApp();
+}
+
+function signup() {
+  const name = document.getElementById('signupName').value.trim();
+  const user = document.getElementById('signupUser').value.trim();
+  const pass = document.getElementById('signupPass').value;
+  const pass2 = document.getElementById('signupPass2').value;
+  const err = document.getElementById('authError');
+
+  if (!name || !user || !pass || !pass2) { err.textContent = 'Please fill in all fields.'; return; }
+  if (pass.length < 4) { err.textContent = 'Password must be at least 4 characters.'; return; }
+  if (pass !== pass2) { err.textContent = 'Passwords do not match.'; return; }
+
+  const users = DB.get('sss_users');
+  if (users.find(u => u.username === user)) { err.textContent = 'Username already exists.'; return; }
+
+  users.push({ name, username: user, password: pass });
+  DB.set('sss_users', users);
+
+  toast('Account created! You can now log in.', 'success');
+  switchTab('login');
+  document.getElementById('loginUser').value = user;
+  document.getElementById('signupName').value = '';
+  document.getElementById('signupUser').value = '';
+  document.getElementById('signupPass').value = '';
+  document.getElementById('signupPass2').value = '';
+}
+
+function logout() {
+  currentUser = null;
+  document.getElementById('appScreen').style.display = 'none';
+  document.getElementById('authScreen').style.display = 'flex';
+  document.getElementById('loginUser').value = '';
+  document.getElementById('loginPass').value = '';
+  document.getElementById('authError').textContent = '';
+}
+
+function startApp() {
+  document.getElementById('authScreen').style.display = 'none';
+  document.getElementById('appScreen').style.display = 'block';
+  document.getElementById('welcomeUser').textContent = `👤 ${currentUser.name}`;
+  refreshAll();
+}
+
+/* ============================================================
+   NAVIGATION
+   ============================================================ */
+function showPage(id, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+  refreshAll();
+}
+
+/* ============================================================
+   PRODUCT CRUD
+   ============================================================ */
+function saveProduct() {
+  const id = document.getElementById('editId').value;
+  const name = document.getElementById('pName').value.trim();
+  const category = document.getElementById('pCategory').value.trim();
+  const price = parseFloat(document.getElementById('pPrice').value);
+  const qty = parseInt(document.getElementById('pQty').value);
+
+  if (!name || !category || isNaN(price) || isNaN(qty)) {
+    toast('Please fill in all product fields correctly.', 'error'); return;
+  }
+  if (price < 0 || qty < 0) { toast('Price and quantity must be positive.', 'error'); return; }
+
+  const products = DB.get('sss_products');
+
+  if (id) {
+    // Update
+    const idx = products.findIndex(p => p.id === parseInt(id));
+    products[idx] = { ...products[idx], name, category, price, qty };
+    toast('Product updated successfully.', 'success');
+  } else {
+    // Create
+    const newId = products.length ? Math.max(...products.map(p => p.id)) + 1 : 1;
+    products.push({ id: newId, name, catego
